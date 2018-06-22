@@ -2,7 +2,7 @@ set(base_SRCS
         Condition.cpp
         CountDownLatch.cpp
         Thread.cpp
-        )
+        ThreadPool.cpp)
 
 add_library(RN_base ${base_SRCS})
 target_link_libraries(RN_base pthread rt)

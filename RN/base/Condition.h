@@ -4,10 +4,12 @@
 
 #ifndef ECHO_CONDITION_H
 #define ECHO_CONDITION_H
-#include <RN/base/Mutex.h>
 #include <pthread.h>
+#include <RN/base/Mutex.h>
 namespace RN {
+
 class Condition : noncopyable {
+
  public:
   explicit Condition(MutexLock &mutex)
       : mutex_(mutex) {

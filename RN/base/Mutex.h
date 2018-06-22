@@ -4,11 +4,11 @@
 
 #ifndef ECHO_MUTEX_H
 #define ECHO_MUTEX_H
+
 #include <RN/base/CurrentThread.h>
 #include <RN/base/noncopyable.h>
 #include <assert.h>
 #include <pthread.h>
-#include <RN/base/Condition.h>
 
 #ifdef CHECK_PTHREAD_RETURN_VALUE
 
@@ -34,6 +34,7 @@ __END_DECLS
 #endif // CHECK_PTHREAD_RETURN_VALUE
 
 namespace RN {
+
 class MutexLock {
  public:
   MutexLock() : holder_(0) {
@@ -97,6 +98,7 @@ class MutexLockGuard {
  private:
   MutexLock &mutex_;
 };
+
 }
 #define MutexLockGuard(x) error "Missing guard object name"
 

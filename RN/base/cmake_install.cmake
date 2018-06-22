@@ -52,6 +52,7 @@ if ("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL
             "/home/renming/ReviveNet/RN/base/Thread.h"
             "/home/renming/ReviveNet/RN/base/ThreadLocal.h"
             "/home/renming/ReviveNet/RN/base/ThreadLocalSingleton.h"
+            "/home/renming/ReviveNet/RN/base/ThreadPool.h"
             "/home/renming/ReviveNet/RN/base/copyable.h"
             "/home/renming/ReviveNet/RN/base/noncopyable.h"
             )

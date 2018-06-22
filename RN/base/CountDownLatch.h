@@ -6,7 +6,7 @@
 #define ECHO_COUNTDOWNLATCH_H
 #include <RN/base/Condition.h>
 #include <RN/base/Mutex.h>
-
+#include <stdio.h>
 namespace RN {
 class CountDownLatch {
  public:
