@@ -48,13 +48,59 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/renming/muduo-tutorial/RN/base
+CMAKE_SOURCE_DIR = /home/renming/ReviveNet
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/renming/muduo-tutorial/RN/base
+CMAKE_BINARY_DIR = /home/renming/ReviveNet
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/local/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/local/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/local/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/local/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
 
 # Special rule for the target rebuild_cache
 rebuild_cache:
@@ -66,6 +112,17 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/local/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -80,14 +137,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/renming/muduo-tutorial/RN/base/CMakeFiles /home/renming/muduo-tutorial/RN/base/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/renming/muduo-tutorial/RN/base/CMakeFiles 0
+	cd /home/renming/ReviveNet && $(CMAKE_COMMAND) -E cmake_progress_start /home/renming/ReviveNet/CMakeFiles /home/renming/ReviveNet/RN/base/CMakeFiles/progress.marks
+	cd /home/renming/ReviveNet && $(MAKE) -f CMakeFiles/Makefile2 RN/base/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/renming/ReviveNet/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/renming/ReviveNet && $(MAKE) -f CMakeFiles/Makefile2 RN/base/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,58 +154,114 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/renming/ReviveNet && $(MAKE) -f CMakeFiles/Makefile2 RN/base/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/renming/ReviveNet && $(MAKE) -f CMakeFiles/Makefile2 RN/base/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/renming/ReviveNet && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named ThreadSingletonTest
+# Convenience name for target.
+RN/base/CMakeFiles/RN_base.dir/rule:
+	cd /home/renming/ReviveNet && $(MAKE) -f CMakeFiles/Makefile2 RN/base/CMakeFiles/RN_base.dir/rule
+.PHONY : RN/base/CMakeFiles/RN_base.dir/rule
 
-# Build rule for target.
-ThreadSingletonTest: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ThreadSingletonTest
-.PHONY : ThreadSingletonTest
+# Convenience name for target.
+RN_base: RN/base/CMakeFiles/RN_base.dir/rule
+
+.PHONY : RN_base
 
 # fast build rule for target.
-ThreadSingletonTest/fast:
-	$(MAKE) -f CMakeFiles/ThreadSingletonTest.dir/build.make CMakeFiles/ThreadSingletonTest.dir/build
-.PHONY : ThreadSingletonTest/fast
+RN_base/fast:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/build
+.PHONY : RN_base/fast
 
-ThreadSingletonTest.o: ThreadSingletonTest.cpp.o
+Condition.o: Condition.cpp.o
 
-.PHONY : ThreadSingletonTest.o
+.PHONY : Condition.o
 
 # target to build an object file
-ThreadSingletonTest.cpp.o:
-	$(MAKE) -f CMakeFiles/ThreadSingletonTest.dir/build.make CMakeFiles/ThreadSingletonTest.dir/ThreadSingletonTest.cpp.o
-.PHONY : ThreadSingletonTest.cpp.o
+Condition.cpp.o:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/Condition.cpp.o
+.PHONY : Condition.cpp.o
 
-ThreadSingletonTest.i: ThreadSingletonTest.cpp.i
+Condition.i: Condition.cpp.i
 
-.PHONY : ThreadSingletonTest.i
+.PHONY : Condition.i
 
 # target to preprocess a source file
-ThreadSingletonTest.cpp.i:
-	$(MAKE) -f CMakeFiles/ThreadSingletonTest.dir/build.make CMakeFiles/ThreadSingletonTest.dir/ThreadSingletonTest.cpp.i
-.PHONY : ThreadSingletonTest.cpp.i
+Condition.cpp.i:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/Condition.cpp.i
+.PHONY : Condition.cpp.i
 
-ThreadSingletonTest.s: ThreadSingletonTest.cpp.s
+Condition.s: Condition.cpp.s
 
-.PHONY : ThreadSingletonTest.s
+.PHONY : Condition.s
 
 # target to generate assembly for a file
-ThreadSingletonTest.cpp.s:
-	$(MAKE) -f CMakeFiles/ThreadSingletonTest.dir/build.make CMakeFiles/ThreadSingletonTest.dir/ThreadSingletonTest.cpp.s
-.PHONY : ThreadSingletonTest.cpp.s
+Condition.cpp.s:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/Condition.cpp.s
+.PHONY : Condition.cpp.s
+
+CountDownLatch.o: CountDownLatch.cpp.o
+
+.PHONY : CountDownLatch.o
+
+# target to build an object file
+CountDownLatch.cpp.o:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/CountDownLatch.cpp.o
+.PHONY : CountDownLatch.cpp.o
+
+CountDownLatch.i: CountDownLatch.cpp.i
+
+.PHONY : CountDownLatch.i
+
+# target to preprocess a source file
+CountDownLatch.cpp.i:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/CountDownLatch.cpp.i
+.PHONY : CountDownLatch.cpp.i
+
+CountDownLatch.s: CountDownLatch.cpp.s
+
+.PHONY : CountDownLatch.s
+
+# target to generate assembly for a file
+CountDownLatch.cpp.s:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/CountDownLatch.cpp.s
+.PHONY : CountDownLatch.cpp.s
+
+Thread.o: Thread.cpp.o
+
+.PHONY : Thread.o
+
+# target to build an object file
+Thread.cpp.o:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/Thread.cpp.o
+.PHONY : Thread.cpp.o
+
+Thread.i: Thread.cpp.i
+
+.PHONY : Thread.i
+
+# target to preprocess a source file
+Thread.cpp.i:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/Thread.cpp.i
+.PHONY : Thread.cpp.i
+
+Thread.s: Thread.cpp.s
+
+.PHONY : Thread.s
+
+# target to generate assembly for a file
+Thread.cpp.s:
+	cd /home/renming/ReviveNet && $(MAKE) -f RN/base/CMakeFiles/RN_base.dir/build.make RN/base/CMakeFiles/RN_base.dir/Thread.cpp.s
+.PHONY : Thread.cpp.s
 
 # Help Target
 help:
@@ -156,12 +269,23 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... install/strip"
+	@echo "... install/local"
+	@echo "... install"
+	@echo "... list_install_components"
+	@echo "... RN_base"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... edit_cache"
-	@echo "... ThreadSingletonTest"
-	@echo "... ThreadSingletonTest.o"
-	@echo "... ThreadSingletonTest.i"
-	@echo "... ThreadSingletonTest.s"
+	@echo "... Condition.o"
+	@echo "... Condition.i"
+	@echo "... Condition.s"
+	@echo "... CountDownLatch.o"
+	@echo "... CountDownLatch.i"
+	@echo "... CountDownLatch.s"
+	@echo "... Thread.o"
+	@echo "... Thread.i"
+	@echo "... Thread.s"
 .PHONY : help
 
 
@@ -173,6 +297,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/renming/ReviveNet && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

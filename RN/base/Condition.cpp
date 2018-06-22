@@ -3,7 +3,7 @@
 //
 #include <RN/base/Condition.h>
 #include <errno.h>
-#include <time.h>
+
 bool RN::Condition::waitForSeconds(double seconds) {
   {
     struct timespec abstime;
@@ -13,6 +13,6 @@ bool RN::Condition::waitForSeconds(double seconds) {
     abstime.tv_sec += static_cast<time_t >((abstime.tv_nsec + nanoseconds) / kNanoSecondsPerSecond);
     abstime.tv_nsec = static_cast<long >((abstime.tv_nsec + nanoseconds) % kNanoSecondsPerSecond);
     MutexLock::UnassignedGuard ug(mutex_);
-    return ETIMEDOUT == pthread_cond_timewait(&pcond_, mutex_.getPthreadMutex(), &abstime);
+    return ETIMEDOUT == pthread_cond_timedwait(&pcond_, mutex_.getPthreadMutex(), &abstime);
   }
 }

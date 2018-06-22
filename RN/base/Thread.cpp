@@ -1,12 +1,12 @@
 //
 // Created by renming on 6/19/18.
 //
-#include "Thread.h"
-#include <RN/base/CurrentThread.h>
+#include <RN/base/Thread.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
-#include <linux/unistd.h>
 #include <unistd.h>
+#include <assert.h>
+
 
 namespace RN {
 namespace CurrentThread {
@@ -29,8 +29,8 @@ class ThreadNameInitializer {
  public:
   ThreadNameInitializer() {
     RN::CurrentThread::t_threadName = "main";
-    CurrentThread::tid;
-    pthread_atfork(NULL, NULL, &afterFork());
+    CurrentThread::tid();
+    pthread_atfork(NULL, NULL, &afterFork);
   }
 };
 ThreadNameInitializer init;
@@ -44,7 +44,7 @@ struct ThreadData {
   ThreadData(ThreadFunc func,
              const string &name,
              pid_t *tid,
-             CountDonwLatch *latch) :
+             CountDownLatch *latch) :
       func_(std::move(func)),
       name_(name),
       tid_(tid),
@@ -59,7 +59,7 @@ struct ThreadData {
     latch_ = NULL;
     //TODO:: set to NULL with reason.
     //TODO:: Remove this confusing code.
-    RN::CurrentThread::t_threadName = name_.empty() ? "RNThread" : name.c_str();
+    RN::CurrentThread::t_threadName = name_.empty() ? "RNThread" : name_.c_str();
     ::prctl(PR_SET_NAME, RN::CurrentThread::t_threadName);
     try {
       func_();
@@ -73,18 +73,18 @@ struct ThreadData {
 };
 
 void *startThread(void *obj) {
-  ThreadData *data = (ThreadData *) obj;
+  ThreadData *data = static_cast<ThreadData *> (obj);
   data->runInThread();
   delete data;
-  data = NULL;
+  return NULL;
 }
 }
 
 }
 using namespace RN;
 void CurrentThread::cacheTid() {
-  if (CurrentThread::t_cachedTid == 0) {
-    t_cachedTid = RN::detail::gettid();
+  if (t_cachedTid == 0) {
+    t_cachedTid = detail::gettid();
     t_tidStringLength = snprintf(t_tidString, sizeof(t_tidString), "%5d ", t_cachedTid);
 
   }
@@ -107,7 +107,7 @@ Thread::Thread(ThreadFunc func, const string &n)
       pthreadId_(0),
       tid_(0),
       func_(std::move(func)),
-      name(n),
+      name_(n),
       latch_(1) {
   setDefaultName();
 }
@@ -131,7 +131,7 @@ void Thread::start() {
   detail::ThreadData *data = new detail::ThreadData(func_, name_, &tid_, &latch_);
   if (pthread_create(&pthreadId_, NULL, &detail::startThread, data)) {
     started_ = false;
-    deleta data;
+    delete data;
     //TODO::CHange to Log
     fprintf(stderr, "Failed in pthread_create\n");
   } else {
@@ -140,7 +140,7 @@ void Thread::start() {
   }
 }
 int Thread::join() {
-  assert(!started_);
+  assert(started_);
   assert(!joined_);
   joined_ = true;
   return pthread_join(pthreadId_, NULL);

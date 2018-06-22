@@ -9,18 +9,18 @@
 #include <RN/base/Atomic.h>
 namespace RN {
 namespace detail {
-<T>
+template<typename T>
 class AtomicIntegerT : noncopyable {
  public:
-  AtomicIntegerT(value)
+  AtomicIntegerT()
       : value_(0) {
 
   }
   T get() {
-    return __sync_val_compare_and_swap(&value_, 0.0);
+    return __sync_val_compare_and_swap(&value_, 0, 0);
   }
   T getAndAdd(T x) {
-    return __sync_fetch_and_add(x);
+    return __sync_fetch_and_add(&value_, x);
   }
   T addAndGet(T x) {
     return getAndAdd(x) + x;
@@ -48,8 +48,8 @@ class AtomicIntegerT : noncopyable {
   volatile T value_;
 };
 }
-typedef ::AtomicIntegerT<int32_t> AtomicInt32;
-typedef ::AtomicIntegerT<int64_t> AtomicInt64;
+typedef detail::AtomicIntegerT<int32_t> AtomicInt32;
+typedef detail::AtomicIntegerT<int64_t> AtomicInt64;
 }
 
 #endif //ECHO_ATOMIC_H

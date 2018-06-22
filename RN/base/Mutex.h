@@ -8,6 +8,7 @@
 #include <RN/base/noncopyable.h>
 #include <assert.h>
 #include <pthread.h>
+#include <RN/base/Condition.h>
 
 #ifdef CHECK_PTHREAD_RETURN_VALUE
 
@@ -34,6 +35,7 @@ __END_DECLS
 
 namespace RN {
 class MutexLock {
+ public:
   MutexLock() : holder_(0) {
     MCHECK(pthread_mutex_init(&mutex_, NULL));
   }
@@ -56,6 +58,7 @@ class MutexLock {
     assert(isLockedByThisThread());
   }
  private:
+  friend class Condition;
 
   class UnassignedGuard {
    public:
@@ -73,8 +76,9 @@ class MutexLock {
 
   void assignHolder() {
     holder_ = CurrentThread::tid();
+
   }
-  voin unAssignHolder() {
+  void unAssignHolder() {
     holder_ = 0;
   }
   pthread_mutex_t mutex_;

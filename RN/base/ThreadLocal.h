@@ -6,12 +6,12 @@
 #define ECHO_THREADLOCAL_H
 #include <RN/base/noncopyable.h>
 #include <pthread.h>
-namespace {
+namespace RN {
 template<typename T>
 class ThreadLocal : noncopyable {
  public:
   ThreadLocal() {
-    MCHECK(pthread_key_create(pkey_, &ThreadLocal::destructor));
+    MCHECK(pthread_key_create(&pkey_, &ThreadLocal::destructor));
   }
   ~ThreadLocal() {
     MCHECK(pthread_key_delete(pkey_));
@@ -31,7 +31,7 @@ class ThreadLocal : noncopyable {
     T *obj = static_cast<T *>(x);
     //let the compiler report error
     typedef char T_must_be_complete_type[sizeof(T) == 0 ? -1 : 1];
-    T_must_be_complete_type dummpy;
+    T_must_be_complete_type dummy;
     (void) dummy;
     delete obj;
   }

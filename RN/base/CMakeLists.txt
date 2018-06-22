@@ -17,6 +17,8 @@ install(TARGETS RN_base DESTINATION lib)
 file(GLOB HEADERS "*.h")
 install(FILES ${HEADERS} DESTINATION include/RN/base)
 
+add_subdirectory(tests)
+
 #if(NOT CMAKE_BUILD_NO_EXAMPLES)
 #    add_subdirectory(tests)
 #endif()

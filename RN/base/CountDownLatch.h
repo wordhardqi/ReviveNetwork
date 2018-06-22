@@ -4,8 +4,8 @@
 
 #ifndef ECHO_COUNTDOWNLATCH_H
 #define ECHO_COUNTDOWNLATCH_H
-#include <Condition.h>
-#include <Mutex.h>
+#include <RN/base/Condition.h>
+#include <RN/base/Mutex.h>
 
 namespace RN {
 class CountDownLatch {
@@ -15,8 +15,10 @@ class CountDownLatch {
   void countDown();
   int getCount() const;
  private:
+
+  //Add mutable qualifier fot int `RN::CountDownLatch::getCount() const`
+  mutable MutexLock mutex_;
   Condition condition_;
-  MutexLock mutex_;
   int count_;
 };
 

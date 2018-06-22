@@ -6,13 +6,17 @@
 #define ECHO_THREAD_H
 #include <string>
 #include <RN/base/Atomic.h>
+#include <RN/base/CountDownLatch.h>
+#include <functional>
+#include <RN/base/CurrentThread.h>
+
 using std::string;
 namespace RN {
 
 class Thread : noncopyable {
  public:
   typedef std::function<void()> ThreadFunc;
-  explicit Thread(ThreadFunc threadFunc, const string name = string());
+  explicit Thread(ThreadFunc threadFunc, const string &name = string());
   ~Thread();
   void start();
   int join();

@@ -36,7 +36,7 @@ class ThreadLocalSingleton : noncopyable {
   class Deleter {
    public:
     Deleter() {
-      pthread_key_create(pkey_, &ThreadLocalSingleton::destructor);
+      pthread_key_create(&pkey_, &ThreadLocalSingleton::destructor);
     }
     ~Deleter() {
       pthread_key_delete(pkey_);
@@ -55,6 +55,6 @@ class ThreadLocalSingleton : noncopyable {
 template<typename T>
 __thread T *ThreadLocalSingleton<T>::t_value_ = NULL;
 template<typename T>
-typename ThreadLocalSingleton<T>::Deleter deleter_;
+typename ThreadLocalSingleton<T>::Deleter ThreadLocalSingleton<T>::deleter_;
 }
 #endif //ECHO_THREADLOCALSINGLETON_H

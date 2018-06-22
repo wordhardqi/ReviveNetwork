@@ -1,0 +1,2 @@
+add_executable(ThreadSingletonTest ThreadSingletonTest.cpp)
+target_link_libraries(ThreadSingletonTest RN_base)

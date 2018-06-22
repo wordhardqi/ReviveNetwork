@@ -4,18 +4,19 @@
 #include <string>
 #include <RN/base/CurrentThread.h>
 #include <RN/base/Thread.h>
-#include <RN/base/ThreadLocalSingleton.h.h>
-#include <stdio.h>
+#include <RN/base/ThreadLocalSingleton.h>
 #include <unistd.h>
+#include <RN/base/Singleton.h>
+#include <RN/base/ThreadLocal.h>
 
 using std::string;
 class Test {
  public:
   Test() {
-    printf("tid: %d construction %p", CurrentThread::tid(), this);
+    printf("tid: %d construction %p \n", RN::CurrentThread::tid(), this);
   }
   ~Test() {
-    printf("tid: %d destroying %p %s", CurrentThread::tid(), this, name_.c_str());
+    printf("tid: %d destroying %p %s \n", RN::CurrentThread::tid(), this, name_.c_str());
   }
   void set(string change_to) {
     name_ = change_to;
@@ -24,10 +25,10 @@ class Test {
  private:
   string name_;
 };
-#define STL RN::ThreadLocalSingleton<Test>::instance()
+#define STL RN::Singleton<RN::ThreadLocal<Test>>::instance().value()
 void print() {
-  printf("tid: %d print %p, %s",
-         CurrentThread::tid(), &STL,
+  printf("tid: %d print %p, %s \n",
+         RN::CurrentThread::tid(), &STL,
          STL.name().c_str());
 
 }

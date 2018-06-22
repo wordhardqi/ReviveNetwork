@@ -17,10 +17,10 @@ class Condition : noncopyable {
     MCHECK(pthread_cond_destroy(&pcond_));
   }
   void wait() {
-    MutexLock::UnassignGuard ug(mutex_);
+    MutexLock::UnassignedGuard ug(mutex_);
     MCHECK(pthread_cond_wait(&pcond_, mutex_.getPthreadMutex()));
   }
-  void waitForSeconds(double seconds);
+  bool waitForSeconds(double seconds);
   void notify() {
     MCHECK(pthread_cond_signal(&pcond_));
   }

@@ -2,9 +2,9 @@
 // Created by renming on 6/19/18.
 //
 
-#include "CountDownLatch.h"
+#include <RN/base/CountDownLatch.h>
 RN::CountDownLatch::CountDownLatch(int count)
-    : count_(count), mutex_(), condition_(mutex_) {
+    : mutex_(), condition_(mutex_), count_(count) {
 
 }
 void RN::CountDownLatch::countDown() {
