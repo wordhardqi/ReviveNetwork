@@ -44,10 +44,12 @@ class MutexLock {
     MCHECK(pthread_mutex_destroy(&mutex_));
   }
   void lock() {
-    pthread_mutex_lock(&mutex_);
+    MCHECK(pthread_mutex_lock(&mutex_));
+    assignHolder();
   }
   void unlock() {
-    pthread_mutex_unlock(&mutex_);
+    unAssignHolder();
+    MCHECK(pthread_mutex_unlock(&mutex_));
   }
   pthread_mutex_t *getPthreadMutex() {
     return &mutex_;
@@ -55,7 +57,7 @@ class MutexLock {
   bool isLockedByThisThread() const {
     return CurrentThread::tid() == holder_;
   }
-  bool assertLocked() const {
+  void assertLocked() const {
     assert(isLockedByThisThread());
   }
  private:

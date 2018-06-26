@@ -6,22 +6,38 @@
 //  Todo :: the handing on maxQueueSize_==0 is ugly. Need better method
 using namespace RN;
 
+ThreadPool::ThreadPool(const string &threadPoolName, const int maxQueueSize)
+    : mutex_(),
+      notFull_(mutex_),
+      notEmpty_(mutex_),
+      name_(threadPoolName),
+      maxQueueSize_(maxQueueSize),
+      running_(false),
+      threads_(),
+      taskQueue_() {
+  //empty
+  //consider whether to reserve space for threads in this.
+
+}
 ThreadPool::~ThreadPool() {
   if (running_) {
     stop();
   }
 }
-void ThreadPool::start() {
+void ThreadPool::start(size_t numThreadInPool) {
+  assert(threads_.empty());
   assert(!running_);
-  threads_.reserve(maxQueueSize_);
-  for (int i = 0; i < static_cast<int>(maxQueueSize_); i++) {
+  running_ = true;
+  threads_.reserve(numThreadInPool);
+  for (int i = 0; i < static_cast<int>(numThreadInPool); i++) {
     char id[32];
     snprintf(id, sizeof(id), "%d", i + 1);
     threads_.emplace_back(new Thread(std::bind(&ThreadPool::runInThread, this), name_ + id));
+    threads_[i]->start();
   }
 
-  if (maxQueueSize_ == 0) {
-    fprintf(stderr, "Warning The thread pool size is 0");
+  if (numThreadInPool == 0) {
+    fprintf(stderr, "Warning The thread pool size is 0 \n");
     if (threadInitCallback_) {
       threadInitCallback_();
     }
@@ -32,16 +48,19 @@ void ThreadPool::stop() {
   MutexLockGuard lockGuard(mutex_);
   running_ = false;
   notEmpty_.notifyAll();
+  notEmpty_.notifyAll();
   for (auto &threadPtr : threads_) {
     threadPtr->join();
   }
+
 }
 ThreadPool::Task ThreadPool::take() {
   MutexLockGuard lockGuard(mutex_);
   while (taskQueue_.empty() && running_) {
     notEmpty_.wait();
   }
-  Task task;
+
+  Task task = NULL;
   if (!taskQueue_.empty()) {
     task = taskQueue_.front();
     taskQueue_.pop_front();
@@ -56,14 +75,28 @@ void ThreadPool::post(ThreadPool::Task task) {
     task();
   } else {
     MutexLockGuard lockGuard(mutex_);
-    while (taskQueue_.size() >= maxQueueSize_ && running_) {
+    while (isFull()) {
+      fprintf(stderr, "post wait \n");
       notFull_.wait();
     }
-    assert(taskQueue_.size() < maxQueueSize_);
+    assert(!isFull());
     taskQueue_.push_back(std::move(task));
+    notEmpty_.notify();
+
 
   }
 
+}
+//size_t ThreadPool::queueSize() const
+//{
+//  MutexLockGuard lock(mutex_);
+//  return taskQueue_.size();
+//}
+
+
+bool ThreadPool::isFull() const {
+  mutex_.assertLocked();
+  return maxQueueSize_ > 0 && static_cast<int>(taskQueue_.size()) >= (maxQueueSize_);
 }
 void ThreadPool::runInThread() {
   try {
@@ -72,8 +105,13 @@ void ThreadPool::runInThread() {
     }
     while (running_) {
       Task task(take());
+
       if (task) {
+
+//        printf("%p \n ", task);
         task();
+        fprintf(stderr, "thread %d runned func_ \n", CurrentThread::tid());
+
       }
     }
   }
@@ -88,5 +126,7 @@ void ThreadPool::runInThread() {
     fprintf(stderr, "unknown exception caught in ThreadPool %s\n", name_.c_str());
     throw; // rethrow
   }
+  fprintf(stderr, "thread %d run In Thread Ended\n", CurrentThread::tid());
+
 }
 

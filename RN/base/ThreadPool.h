@@ -18,20 +18,10 @@ namespace RN {
 class ThreadPool {
  public:
   typedef std::function<void()> Task;
-  ThreadPool(const string &threadPoolName = string("RNThreadPool"), const int maxQueueSize = 0)
-      : mutex_(),
-        notFull_(mutex_),
-        notEmpty_(mutex_),
-        name_(threadPoolName),
-        maxQueueSize_(maxQueueSize),
-        running_(false) {
-    //empty
-    //consider whether to reserve sapce for threads in this.
-
-  }
+  ThreadPool(const string &threadPoolName = string("RNThreadPool"), const int maxQueueSize = 0);
   ~ThreadPool();
 
-  void start();
+  void start(size_t numThreadInPool);
   void stop();
   Task take();
   void post(Task task);
@@ -42,16 +32,20 @@ class ThreadPool {
     threadInitCallback_ = cb;
   }
   size_t queueSize() const {
-    return maxQueueSize_;
+    MutexLockGuard lockGuard(mutex_);
+    return taskQueue_.size();
   }
+  bool isFull() const;
+  void setMaxQueueSize(int maxSize) { maxQueueSize_ = maxSize; }
+
 
  private:
   void runInThread();
-  MutexLock mutex_;
+  mutable MutexLock mutex_;
   Condition notFull_;
   Condition notEmpty_;
   string name_;
-  size_t maxQueueSize_;
+  int maxQueueSize_;
   bool running_;
   Task threadInitCallback_;
   std::vector<std::unique_ptr<Thread>> threads_;

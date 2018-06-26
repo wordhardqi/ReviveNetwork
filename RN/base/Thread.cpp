@@ -61,8 +61,12 @@ struct ThreadData {
     //TODO:: Remove this confusing code.
     RN::CurrentThread::t_threadName = name_.empty() ? "RNThread" : name_.c_str();
     ::prctl(PR_SET_NAME, RN::CurrentThread::t_threadName);
+    fprintf(stderr, "thread %d started \n", CurrentThread::tid());
+
     try {
       func_();
+      fprintf(stderr, "thread %d runned func_ \n", CurrentThread::tid());
+
       RN::CurrentThread::t_threadName = "Finished";
     }
     catch (...) {
@@ -126,14 +130,12 @@ void Thread::setDefaultName() {
 }
 void Thread::start() {
   assert(!started_);
-  assert(!joined_);
   started_ = true;
   detail::ThreadData *data = new detail::ThreadData(func_, name_, &tid_, &latch_);
   if (pthread_create(&pthreadId_, NULL, &detail::startThread, data)) {
     started_ = false;
     delete data;
     //TODO::CHange to Log
-    fprintf(stderr, "Failed in pthread_create\n");
   } else {
     latch_.wait();
     assert(tid_ > 0);

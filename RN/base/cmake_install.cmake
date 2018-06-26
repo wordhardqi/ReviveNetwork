@@ -44,6 +44,7 @@ endif ()
 if ("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
     file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/RN/base" TYPE FILE FILES
             "/home/renming/ReviveNet/RN/base/Atomic.h"
+            "/home/renming/ReviveNet/RN/base/BlockingQueue.h"
             "/home/renming/ReviveNet/RN/base/Condition.h"
             "/home/renming/ReviveNet/RN/base/CountDownLatch.h"
             "/home/renming/ReviveNet/RN/base/CurrentThread.h"
