@@ -47,7 +47,7 @@ void test(int maxSize) {
   fprintf(stderr, "Test ThreadPool with max queue size = %d \n", maxSize);
   RN::ThreadPool pool("MainThreadPool");
   pool.setMaxQueueSize(maxSize);
-  pool.start(2);
+    pool.start(3);
 
   fprintf(stderr, "Adding \n");
   pool.post(print);

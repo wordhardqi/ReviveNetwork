@@ -104,3 +104,6 @@ add_subdirectory(RN/base)
 #  endif()
 #endif()
 
+
+#add_executable(push_obj scratch/push_obj.cpp)
+#add_executable(strlen scratch/strlen.cpp)

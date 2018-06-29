@@ -42,6 +42,22 @@ class BlockingQueue : noncopyable {
     MutexLockGuard lockGuard(mutex_);
     return queue_.size();
   }
+
+    bool empty() const {
+        MutexLockGuard lockGuard(mutex_);
+        return queue_.empty();
+    }
+
+    bool full() const {
+        MutexLockGuard lockGuard(mutex_);
+        return queue_.full();
+    }
+
+    size_t capacity() const {
+        MutexLockGuard lockGuard(mutex_);
+        return queue_.capacity();
+    }
+
  private:
   mutable MutexLock mutex_;
   Condition notEmpty_;
