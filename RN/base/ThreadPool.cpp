@@ -45,10 +45,13 @@ void ThreadPool::start(size_t numThreadInPool) {
 
 }
 void ThreadPool::stop() {
-  MutexLockGuard lockGuard(mutex_);
-  running_ = false;
-  notEmpty_.notifyAll();
-  notEmpty_.notifyAll();
+    {
+
+        //unlock
+        MutexLockGuard lockGuard(mutex_);
+        running_ = false;
+        notEmpty_.notifyAll();
+    }
   for (auto &threadPtr : threads_) {
     threadPtr->join();
   }
@@ -108,10 +111,8 @@ void ThreadPool::runInThread() {
 
       if (task) {
 
-//        printf("%p \n ", task);
         task();
-        fprintf(stderr, "thread %d runned func_ \n", CurrentThread::tid());
-
+          LOG_INFO << "task finished";
       }
     }
   }
@@ -126,7 +127,6 @@ void ThreadPool::runInThread() {
     fprintf(stderr, "unknown exception caught in ThreadPool %s\n", name_.c_str());
     throw; // rethrow
   }
-  fprintf(stderr, "thread %d run In Thread Ended\n", CurrentThread::tid());
 
 }
 

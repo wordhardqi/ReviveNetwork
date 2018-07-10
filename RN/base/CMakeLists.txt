@@ -4,7 +4,12 @@ set(base_SRCS
         Thread.cpp
         ThreadPool.cpp
         LogStream.cpp
-
+        Timestamp.cpp
+        ProcessInfo.cpp
+        FileUtil.cpp
+        LogFile.cpp
+        AsyncLogging.cpp
+        Logging.cpp
         )
 
 add_library(RN_base ${base_SRCS})
@@ -21,7 +26,6 @@ file(GLOB HEADERS "*.h")
 install(FILES ${HEADERS} DESTINATION include/RN/base)
 
 add_subdirectory(tests)
-
 #if(NOT CMAKE_BUILD_NO_EXAMPLES)
 #    add_subdirectory(tests)
 #endif()

@@ -7,7 +7,7 @@
 #include <RN/base/Mutex.h>
 #include <RN/base/Condition.h>
 #include <RN/base/Thread.h>
-
+#include <RN/base/Logging.h>
 #include <functional>
 #include <vector>
 #include <string>

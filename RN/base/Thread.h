@@ -4,7 +4,8 @@
 
 #ifndef ECHO_THREAD_H
 #define ECHO_THREAD_H
-#include <string>
+
+#include <RN/base/Types.h>
 #include <RN/base/Atomic.h>
 #include <RN/base/CountDownLatch.h>
 #include <functional>

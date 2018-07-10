@@ -93,7 +93,8 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
 add_subdirectory(RN/base)
-#add_subdirectory(RN/net)
+add_subdirectory(scratch)
+add_subdirectory(RN/net)
 
 #if(NOT CMAKE_BUILD_NO_EXAMPLES)
 #  add_subdirectory(contrib)
@@ -103,7 +104,6 @@ add_subdirectory(RN/base)
 #    add_subdirectory(examples/cdns)
 #  endif()
 #endif()
+add_executable(push_obj scratch/push_obj.cpp)
+add_executable(strlen scratch/strlen.cpp)
 
-
-#add_executable(push_obj scratch/push_obj.cpp)
-#add_executable(strlen scratch/strlen.cpp)

@@ -12,6 +12,13 @@ target_link_libraries(BlockQueueTest RN_base)
 
 add_executable(ThreadTest ThreadTest.cpp)
 target_link_libraries(ThreadTest RN_base)
+add_executable(TimestampTest TimestampTest.cpp)
+target_link_libraries(TimestampTest RN_base)
+add_executable(LoggingTest LoggingTest.cpp)
+target_link_libraries(LoggingTest RN_base)
+add_executable(Async Async.cpp)
+target_link_libraries(Async RN_base)
+
 
 if (BOOSTTEST_LIBRARY)
     add_executable(LogStreamTest LogStreamTest.cpp)

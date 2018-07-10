@@ -5,7 +5,6 @@
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-#include <assert.h>
 
 
 namespace RN {
@@ -65,7 +64,6 @@ struct ThreadData {
 
     try {
       func_();
-      fprintf(stderr, "thread %d runned func_ \n", CurrentThread::tid());
 
       RN::CurrentThread::t_threadName = "Finished";
     }
