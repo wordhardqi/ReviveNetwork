@@ -10,8 +10,9 @@
 #include <sys/types.h>
 #include <boost/scoped_ptr.hpp>
 #include <vector>
+#include <RN/base/Mutex.h>
 #include "TimerQueue.h"
-
+#include "IOWakeupTrigger.h"
 namespace RN {
     class Channel;
 
@@ -23,6 +24,8 @@ namespace RN {
 
     class EventLoop : RN::noncopyable {
     public:
+        typedef std::function<void()> Functor;
+
         EventLoop();
 
         ~EventLoop();
@@ -50,23 +53,40 @@ namespace RN {
             return pollReturnTime_;
         }
 
+
         TimerId runAt(const Timestamp &time, const TimerCallback);
 
         TimerId runAfter(double delay, const TimerCallback);
 
         TimerId runEvery(double interval, const TimerCallback);
 
+        void wakeup() {
+            wakeupTrigger_->wakeup();
+        }
+
+        void queueInLoop(const Functor &cb);
+
+        void runInLoop(const Functor &cb);
+
+
     private:
         typedef std::vector<Channel *> ChannelList;
-
         void abortNotInLoopThread();
 
+        void doPendingFunctors();
         bool looping_;
         bool quit_;
         const pid_t threadId_;
         boost::scoped_ptr<Poller> poller_;
         Timestamp pollReturnTime_;
         std::unique_ptr<TimerQueue> timerQueue_;
+        std::unique_ptr<IOWakeupTrigger> wakeupTrigger_;
+
+        std::vector<Functor> pendingFunctors_;
+        bool callingPendingFunctors_;
+        MutexLock mutex_;
+
+
         ChannelList activeChannels_;
     };
 

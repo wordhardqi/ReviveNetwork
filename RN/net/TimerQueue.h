@@ -30,6 +30,8 @@ namespace RN {
 
         void handleRead();
 
+        void addTimerInLoop(TimerPtr timer);
+
         std::vector<Entry> getExpired(Timestamp now);
 
         void reset(const std::vector<Entry> &expired, Timestamp now);

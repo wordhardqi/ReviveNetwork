@@ -86,13 +86,24 @@ RN::TimerId RN::TimerQueue::addTimer(const RN::TimerCallback &cb,
                                      RN::Timestamp when,
                                      double interval) {
     TimerPtr newTimer(new Timer(cb, when, interval));
-    loop_->assertInLoopThread();
-    bool earliestChanged = insert(newTimer);
-    if (earliestChanged) {
-        resetTimerfd(timerfd_, when);
-    }
+//    loop_->assertInLoopThread();
+//    bool earliestChanged = insert(newTimer);
+//    if (earliestChanged) {
+//        resetTimerfd(timerfd_, when);
+//    }
+//    return TimerId(newTimer);
+    loop_->runInLoop(
+            std::bind(&TimerQueue::addTimerInLoop, this, newTimer));
     return TimerId(newTimer);
 
+}
+
+void RN::TimerQueue::addTimerInLoop(RN::TimerPtr timer) {
+    loop_->assertInLoopThread();
+    bool earliestChanged = insert(timer);
+    if (earliestChanged) {
+        resetTimerfd(timerfd_, timer->expiration());
+    }
 
 }
 

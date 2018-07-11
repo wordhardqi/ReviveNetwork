@@ -14,7 +14,10 @@ RN::EventLoop::EventLoop()
         : looping_(false), quit_(false),
           threadId_(RN::CurrentThread::tid()),
           poller_(new Poller(this)), pollReturnTime_(0),
-          timerQueue_(new TimerQueue(this)) {
+          timerQueue_(new TimerQueue(this)),
+          wakeupTrigger_(new IOWakeupTrigger(this)),
+          pendingFunctors_(), callingPendingFunctors_(false),
+          mutex_() {
     LOG_TRACE << "EventLoop created " << this << "in thread " <<
               threadId_;
     if (t_loopInThisThread) {
@@ -43,6 +46,7 @@ void RN::EventLoop::loop() {
             (*it)->handleEvent();
 
         }
+        doPendingFunctors();
 
     }
     LOG_TRACE << "EventLoop " << this << " stop looping";
@@ -58,6 +62,9 @@ void RN::EventLoop::abortNotInLoopThread() {
 
 void EventLoop::quit() {
     quit_ = true;
+    if (!isInLoopThread()) {
+        wakeup();
+    }
 }
 
 void EventLoop::updateChannel(Channel *channel) {
@@ -78,4 +85,36 @@ TimerId EventLoop::runAfter(double delay, const TimerCallback cb) {
 
 TimerId EventLoop::runEvery(double interval, const TimerCallback cb) {
     return timerQueue_->addTimer(cb, Timestamp::now(), interval);
+}
+
+void EventLoop::queueInLoop(const EventLoop::Functor &cb) {
+    {
+        MutexLockGuard lockGuard(mutex_);
+        pendingFunctors_.push_back(cb);
+    }
+    if (!isInLoopThread() || callingPendingFunctors_) {
+        wakeup();
+    }
+}
+
+void EventLoop::doPendingFunctors() {
+    std::vector<Functor> functors;
+    callingPendingFunctors_ = true; /*atomic*/
+    {
+        MutexLockGuard lockGuard(mutex_);
+        functors.swap(pendingFunctors_);
+    }
+    for (auto &cb : functors) {
+        cb();
+    }
+    callingPendingFunctors_ = false;
+
+}
+
+void EventLoop::runInLoop(const EventLoop::Functor &cb) {
+    if (isInLoopThread()) {
+        cb();
+    } else {
+        queueInLoop(cb);
+    }
 }
