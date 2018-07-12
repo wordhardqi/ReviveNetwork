@@ -26,6 +26,8 @@ namespace RN {
 
         void updateChannel(Channel *channel);
 
+        void removeChannel(Channel *channel);
+
         void assertInLoopThread() {
             ownerLoop_->assertInLoopThread();
         }

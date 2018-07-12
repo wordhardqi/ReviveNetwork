@@ -23,6 +23,10 @@ namespace RN {
             newConnectionCallback_ = cb;
         }
 
+        bool listennning() {
+            return listennning_;
+        }
+
         void listen();
 
     private:

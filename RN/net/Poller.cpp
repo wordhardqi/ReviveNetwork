@@ -5,6 +5,7 @@
 #include <poll.h>
 #include <RN/base/Logging.h>
 #include "Poller.h"
+#include <algorithm>
 
 RN::Poller::Poller(RN::EventLoop *loop)
         : ownerLoop_(loop) {
@@ -48,11 +49,12 @@ void RN::Poller::updateChannel(RN::Channel *channel) {
         int idx = channel->index();
         assert(0 <= idx && idx < static_cast<int>(pollfds_.size()));
         struct pollfd &pfd = pollfds_[idx];
-        assert(pfd.fd == channel->fd() || pfd.fd == -1);
+        // pfd.fd == -channel->fd()-1 when channel is kNoneEvent;
+        assert(pfd.fd == channel->fd() || pfd.fd == -channel->fd() - 1);
         pfd.events = static_cast<short>(channel->events());
         pfd.revents = 0;
         if (channel->isNoneEvent()) {
-            pfd.fd = -1;
+            pfd.fd = -channel->fd() - 1;
         }
     }
 }
@@ -71,4 +73,32 @@ void RN::Poller::fillActiveChannels(int numEvents, RN::Poller::ChannelList *acti
 
         }
     }
+}
+
+void RN::Poller::removeChannel(RN::Channel *channel) {
+    assertInLoopThread();
+    LOG_TRACE << "fd = " << channel->fd();
+    assert(channels_[channel->fd()] == channel);
+    //need to disable channel first;
+    assert(channel->isNoneEvent());
+    int idx = channel->index();
+    assert(0 <= idx && idx < static_cast<int>(channels_.size()));
+
+    size_t n = channels_.erase(channel->fd());
+    assert(n == 1);
+    (void) n;
+    //remove channel's fd in pollfds_
+    if (implicit_cast<size_t>(idx) == pollfds_.size() - 1) {
+        pollfds_.pop_back();
+    } else {
+        int channelAtEnd = pollfds_.back().fd;
+        std::iter_swap(pollfds_.begin() + idx, pollfds_.end() - 1);
+        if (channelAtEnd < 0) {
+            //get the correct channel fd for channel[kNoneEvent]
+            channelAtEnd = -channelAtEnd - 1;
+        }
+        channels_[channelAtEnd]->set_index(idx);
+        pollfds_.pop_back();
+    }
+
 }

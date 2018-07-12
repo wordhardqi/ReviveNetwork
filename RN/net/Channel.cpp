@@ -17,6 +17,10 @@ void RN::Channel::update() {
     loop_->updateChannel(this);
 }
 
+RN::Channel::~Channel() {
+    assert(!eventHandling_);
+}
+
 RN::Channel::Channel(RN::EventLoop *loop, int fd)
         : loop_(loop),
           fd_(fd),
@@ -25,11 +29,15 @@ RN::Channel::Channel(RN::EventLoop *loop, int fd)
 }
 
 void RN::Channel::handleEvent() {
+    eventHandling_ = true;
     if (revents_ & POLLNVAL) {
         LOG_WARN << "Channel::handle_event() POLLNVAL";
     }
     if (revents_ & (POLLERR | POLLNVAL)) {
         if (errorCallback_) errorCallback_();
+    }
+    if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
+        if (closeCallback_) closeCallback_();
     }
     if (revents_ & (POLLIN | POLLPRI | POLLRDHUP)) {
         if (readCallback_) readCallback_();
@@ -37,5 +45,6 @@ void RN::Channel::handleEvent() {
     if (revents_ & POLLOUT) {
         if (writeCallback_) writeCallback_();
     }
+    eventHandling_ = false;
 
 }

@@ -18,6 +18,7 @@ namespace RN {
 
         Channel(EventLoop *loop, int fd);
 
+        ~Channel();
         void handleEvent();
 
         void setReadCallback(const EventCallback &cb) {
@@ -30,6 +31,10 @@ namespace RN {
 
         void setErrorCallback(const EventCallback &cb) {
             errorCallback_ = cb;
+        }
+
+        void setCloseCallback(const EventCallback &cb) {
+            closeCallback_ = cb;
         }
 
         int fd() const {
@@ -50,6 +55,11 @@ namespace RN {
 
         void enableReading() {
             events_ |= kReadEvent;
+            update();
+        }
+
+        void disableAll() {
+            events_ = kNoneEvent;
             update();
         }
 
@@ -76,9 +86,12 @@ namespace RN {
         int events_;
         int revents_;
         int index_;
+        bool eventHandling_;
+
         EventCallback readCallback_;
         EventCallback writeCallback_;
         EventCallback errorCallback_;
+        EventCallback closeCallback_;
     };
 }
 

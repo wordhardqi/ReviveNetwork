@@ -42,6 +42,23 @@ add_executable(test7
         Socket.cpp
         SocketsOps.cpp
         Acceptor.cpp
-
         )
 target_link_libraries(test7 RN_base)
+
+add_executable(testConnection
+        testConnection.cpp
+        TimerQueue.cpp
+        EventLoop.cpp
+        Poller.cpp
+        Channel.cpp
+        Timer.cpp
+        IOWakeupTrigger.cpp
+        EventLoopThread.cpp
+        Socket.cpp
+        SocketsOps.cpp
+        Acceptor.cpp
+        TcpConnection.cpp
+        TcpServer.cpp
+
+        )
+target_link_libraries(testConnection RN_base)

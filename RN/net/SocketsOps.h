@@ -49,6 +49,7 @@ namespace RN {
 
         void fromHostPort(const char *ip, uint16_t port, struct sockaddr_in *addr);
 
+        int getSocketError(int sockfd);
     }
 
 }

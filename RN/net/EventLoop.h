@@ -37,6 +37,8 @@ namespace RN {
         //Todo:: Simplify the owning structure.
         void updateChannel(Channel *channel);
 
+        void removeChannle(Channel *channel);
+
         void assertInLoopThread() {
             if (threadId_ == RN::CurrentThread::tid()) {
                 return;
