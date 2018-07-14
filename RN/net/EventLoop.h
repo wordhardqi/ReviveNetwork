@@ -62,6 +62,8 @@ namespace RN {
 
         TimerId runEvery(double interval, const TimerCallback);
 
+        void cancle(TimerId timerId);
+
         void wakeup() {
             wakeupTrigger_->wakeup();
         }

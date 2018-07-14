@@ -7,21 +7,23 @@
 #include "TcpServer.h"
 #include <RN/base/ProcessInfo.h>
 
-RN::string message1;
-RN::string message2;
+using namespace RN;
+RN::string message;
 
 void onConnection(const RN::TcpConnectionPtr &conn) {
     if (conn->connected()) {
-        printf("onConnection(): new connection[%s] from %s \n",
-               conn->getName().c_str(), conn->getPeerAddr().toHostPort().c_str());
-        conn->send(message1);
-        conn->send(message2);
-        conn->shutdown();
+        LOG_INFO << "new connection: " << conn->getPeerAddr().toHostPort()
+                 << " - " << conn->getLocalAddr().toHostPort();
+        conn->send(message);
     } else {
         printf("onConnection(): connection[%s] is down",
                conn->getName().c_str());
     }
 
+}
+
+void onWriteComplete(const RN::TcpConnectionPtr &conn) {
+    conn->send(message);
 }
 
 void onMessage(const RN::TcpConnectionPtr &conn, RN::Buffer *data, RN::Timestamp receivedTime) {
@@ -32,19 +34,22 @@ void onMessage(const RN::TcpConnectionPtr &conn, RN::Buffer *data, RN::Timestamp
 
 int main() {
     printf("main(): pid = %d\n", getpid());
+    RN::string line;
+    for (int i = 33; i < 127; ++i) {
+        line.push_back(char(i));
+    }
+    line += line;
 
-    int len1 = 100;
-    int len2 = 200;
-    message1.resize(len1);
-    message2.resize(len2);
-    std::fill(message1.begin(), message1.end(), 'A');
-    std::fill(message2.begin(), message2.end(), 'B');
-
+    for (size_t i = 0; i < 127 - 33; ++i) {
+        message += line.substr(i, 72);
+        message.push_back('\n');
+    }
     RN::InetAddress listenAddr(9981);
     RN::EventLoop loop;
     RN::TcpServer server("TestConnection", &loop, listenAddr);
     server.setMessageCallback(onMessage);
     server.setConnectionCallback(onConnection);
+    server.setWriteCompleteCallback(onWriteComplete);
     server.start();
     loop.loop();
 

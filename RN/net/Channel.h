@@ -7,21 +7,24 @@
 
 #include <RN/base/noncopyable.h>
 #include <functional>
-
+#include <RN/base/Timestamp.h>
 namespace RN {
     class EventLoop;
+
 
     class Channel : noncopyable {
 
     public:
         typedef std::function<void()> EventCallback;
+        typedef std::function<void(Timestamp)> ReadEventCallback;
 
         Channel(EventLoop *loop, int fd);
 
         ~Channel();
-        void handleEvent();
 
-        void setReadCallback(const EventCallback &cb) {
+        void handleEvent(Timestamp);
+
+        void setReadCallback(const ReadEventCallback &cb) {
             readCallback_ = cb;
         }
 
@@ -58,6 +61,21 @@ namespace RN {
             update();
         }
 
+        void enableWriting() {
+            events_ |= kWriteEvent;
+            update();
+        }
+
+        void disableWriting() {
+            events_ &= ~kWriteEvent;
+            update();
+        }
+
+        bool isWriting() {
+            return events_ & kWriteEvent;
+        }
+
+
         void disableAll() {
             events_ = kNoneEvent;
             update();
@@ -88,7 +106,7 @@ namespace RN {
         int index_;
         bool eventHandling_;
 
-        EventCallback readCallback_;
+        ReadEventCallback readCallback_;
         EventCallback writeCallback_;
         EventCallback errorCallback_;
         EventCallback closeCallback_;

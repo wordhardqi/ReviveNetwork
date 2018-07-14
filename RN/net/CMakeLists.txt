@@ -62,3 +62,21 @@ add_executable(testConnection
 
         )
 target_link_libraries(testConnection RN_base)
+add_executable(testCharGen
+        testCharGen.cpp
+        TimerQueue.cpp
+        EventLoop.cpp
+        Poller.cpp
+        Channel.cpp
+        Timer.cpp
+        IOWakeupTrigger.cpp
+        EventLoopThread.cpp
+        Socket.cpp
+        SocketsOps.cpp
+        Acceptor.cpp
+        TcpConnection.cpp
+        TcpServer.cpp
+        EventLoopThreadPool.cpp
+
+        )
+target_link_libraries(testCharGen RN_base)

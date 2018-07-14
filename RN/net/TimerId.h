@@ -18,8 +18,13 @@ namespace RN {
                 : value_(timer) {
         }
 
+
     private:
         TimerPtr value_;
     };
+
+    bool operator==(const TimerId &lhs, const TimerId &rhs) {
+        return lhs.value_ == rhs.value_;
+    }
 }
 #endif //RN_TIMERID_H

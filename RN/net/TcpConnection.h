@@ -10,6 +10,7 @@
 #include "Socket.h"
 #include "Channel.h"
 #include "Callbacks.h"
+#include "Buffer.h"
 
 namespace RN {
     class TcpConnection : RN::noncopyable,
@@ -24,11 +25,21 @@ namespace RN {
                   socket_(new Socket(socketfd)),
                   channel_(new Channel(loop_, socketfd)),
                   localAddr_(localAddr),
-                  peerAddr_(peerAddr) {
+                  peerAddr_(peerAddr),
+                  highWaterMark_(64 * 1024 * 1024) {
             LOG_DEBUG << "TcpConnection::ctor[" << name_
                       << "] at " << this << " fd=" << socketfd;
             channel_->setReadCallback(
-                    std::bind(&TcpConnection::handleRead, this));
+                    std::bind(&TcpConnection::handleRead, this, std::placeholders::_1));
+            channel_->setWriteCallback(
+                    std::bind(&TcpConnection::handleWrite, this));
+            channel_->setCloseCallback(
+                    std::bind(&TcpConnection::handleClose, this));
+            channel_->setErrorCallback(
+                    std::bind(&TcpConnection::handleError, this));
+
+
+
 
 
         }
@@ -60,12 +71,12 @@ namespace RN {
         }
 
 
-        const std::unique_ptr<Socket> &getSocket() const {
-            return socket_;
+        const Socket &getSocket() const {
+            return *socket_;
         }
 
-        const std::unique_ptr<Channel> &getChannel() const {
-            return channel_;
+        const Channel &getChannel() const {
+            return *channel_;
         }
 
         void setConnectionCallback(const ConnectionCallback &connectionCallback) {
@@ -76,22 +87,44 @@ namespace RN {
             messageCallback_ = messageCallback;
         }
 
-        void setCloseCallback(CloseCallback cb) {
+        void setCloseCallback(const CloseCallback &cb) {
             closeCallback_ = cb;
+        }
+
+        void setHighWaterMarkCallback(const HighWaterMarkCallback &cb) {
+            highWaterMarkCallback_ = cb;
+        }
+
+        void setWriteCompleteCallback(const WriteCompleteCallback &cb) {
+            writeCompleteCallback_ = cb;
         }
 
         void connectionEstablished();
 
         void connectionDestroyed();
 
+        void send(const string &message);
+
+        void shutdown();
+
+        void setTcpNoDelay(bool on) {
+
+        }
+
+        void setTcpKeepAlive(bool on) {
+
+        }
+
     private:
         enum StateE {
             kConnecitng,
             kConnected,
+            kDisconnecting,
             kDisconnected,
+
         };
 
-        void handleRead();
+        void handleRead(Timestamp);
 
         void handleWrite();
 
@@ -103,8 +136,14 @@ namespace RN {
             state_ = s;
         }
 
+        void sendInLoop(const string &message);
+
+        void shutdonwInLoop();
+
+
         EventLoop *loop_;
         string name_;
+
         StateE state_;
         std::unique_ptr<Socket> socket_;
         std::unique_ptr<Channel> channel_;
@@ -113,6 +152,11 @@ namespace RN {
         ConnectionCallback connectionCallback_;
         MessageCallback messageCallback_;
         CloseCallback closeCallback_;
+        WriteCompleteCallback writeCompleteCallback_;
+        size_t highWaterMark_;
+        HighWaterMarkCallback highWaterMarkCallback_;
+        Buffer inputBuffer_;
+        Buffer outputBuffer_;
 
     };
 }

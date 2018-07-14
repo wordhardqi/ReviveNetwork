@@ -3,6 +3,7 @@
 //
 
 #include <RN/base/Logging.h>
+#include <signal.h>
 #include "EventLoop.h"
 #include "Poller.h"
 
@@ -10,6 +11,16 @@ using namespace RN;
 __thread EventLoop *t_loopInThisThread = 0;
 const int kPollTimeMs = 10000;
 
+class IngnoreSigPipe {
+public:
+    IngnoreSigPipe() {
+        ::signal(SIGPIPE, SIG_IGN);
+    }
+
+private:
+};
+
+IngnoreSigPipe ingnoreSigPipeInitObj;
 RN::EventLoop::EventLoop()
         : looping_(false), quit_(false),
           threadId_(RN::CurrentThread::tid()),
@@ -41,9 +52,10 @@ void RN::EventLoop::loop() {
     while (!quit_) {
         activeChannels_.clear();
         poller_->poll(kPollTimeMs, &activeChannels_);
+        Timestamp receivedTime = Timestamp::now();
         for (ChannelList::iterator it = activeChannels_.begin();
              it != activeChannels_.end(); ++it) {
-            (*it)->handleEvent();
+            (*it)->handleEvent(receivedTime);
 
         }
         doPendingFunctors();
@@ -91,6 +103,11 @@ TimerId EventLoop::runAfter(double delay, const TimerCallback cb) {
 
 TimerId EventLoop::runEvery(double interval, const TimerCallback cb) {
     return timerQueue_->addTimer(cb, Timestamp::now(), interval);
+}
+
+void EventLoop::cancle(TimerId timerId) {
+
+
 }
 
 void EventLoop::queueInLoop(const EventLoop::Functor &cb) {

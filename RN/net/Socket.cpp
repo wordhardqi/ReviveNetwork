@@ -3,6 +3,7 @@
 //
 
 #include "Socket.h"
+#include <netinet/tcp.h>
 
 void RN::Socket::bindAddress(const RN::InetAddress &addr) {
     sockets::bindOrDie(sockfd_, addr.getSockAddrInet());
@@ -27,4 +28,20 @@ void RN::Socket::setReuseAddr(bool on) {
     int optval = on ? 1 : 0;
     ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
+}
+
+
+void RN::Socket::setTcpNoDelay(bool on) {
+    int optval = on ? 1 : 0;
+    ::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+}
+
+
+void RN::Socket::setKeepAlive(bool on) {
+    int optval = on ? 1 : 0;
+    ::setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+}
+
+void RN::Socket::shutdownWrite() {
+    sockets::shutdownWrite(sockfd_);
 }

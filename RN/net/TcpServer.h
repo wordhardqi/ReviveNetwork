@@ -11,6 +11,8 @@
 #include "Callbacks.h"
 #include "Acceptor.h"
 #include "TcpConnection.h"
+#include "EventLoopThread.h"
+#include "EventLoopThreadPool.h"
 
 namespace RN {
     class TcpServer {
@@ -19,13 +21,16 @@ namespace RN {
 
         TcpServer(const string name, EventLoop *loop, const InetAddress &serverAddr)
                 : name_(name), loop_(loop), serverAddr_(serverAddr),
-                  acceptor_(new Acceptor(loop_, serverAddr_)),
+                  acceptor_(new Acceptor(loop_, serverAddr_)), numOfThreads_(0),
+                  threadPool_(new EventLoopThreadPool(loop_, numOfThreads_)),
                   nextConnectionId_(1),
                   connections_(),
                   started_(false) {
             using namespace std::placeholders;
             acceptor_->setNewConnectionCallback(
                     std::bind(&TcpServer::createNewConneciton, this, _1, _2));
+            setCloseCallback(
+                    std::bind(&TcpServer::removeConnection, this, _1));
 
         }
 
@@ -38,6 +43,9 @@ namespace RN {
             if (!started_) {
                 started_ = true;
 
+            }
+            if (!threadPool_->isStarted()) {
+                threadPool_->start();
             }
             if (!acceptor_->listennning()) {
                 loop_->runInLoop(std::bind(&Acceptor::listen, acceptor_.get()));
@@ -56,6 +64,19 @@ namespace RN {
         void setCloseCallback(CloseCallback cb) {
             closeCallback_ = cb;
         }
+
+        void setHighWaterMarkCallback(const HighWaterMarkCallback &cb) {
+            highWaterMarkCallback_ = cb;
+        }
+
+        void setWriteCompleteCallback(const WriteCompleteCallback &cb) {
+            writeCompleteCallback_ = cb;
+        }
+
+        void setNumOfThreads(int n) {
+            numOfThreads_ = n;
+        }
+
 
         const InetAddress &serverAddr() {
             return serverAddr_;
@@ -76,28 +97,34 @@ namespace RN {
             LOG_INFO << "TcpServer::newConnection [" << name_
                      << "] - new connection [" << connName
                      << "] from " << peerAddr.toHostPort();
+            EventLoop *ioLoop = threadPool_->getNextLoop();
             TcpConnectionPtr connPtr(
                     new TcpConnection(
-                            loop_, connName, connfd, serverAddr_, peerAddr));
+                            ioLoop, connName, connfd, serverAddr_, peerAddr));
             connPtr->setConnectionCallback(connectionCallback_);
             connPtr->setMessageCallback(messageCallback_);
-            connPtr->setCloseCallback(std::bind(
-                    &TcpServer::removeConnection, this, std::placeholders::_1)
-            );
+            connPtr->setCloseCallback(closeCallback_);
+            connPtr->setHighWaterMarkCallback(highWaterMarkCallback_);
+            connPtr->setWriteCompleteCallback(writeCompleteCallback_);
             connections_[connName] = connPtr;
             ++nextConnectionId_;
-            connPtr->connectionEstablished();
+            ioLoop->runInLoop(std::bind(&TcpConnection::connectionEstablished, connPtr));
         }
 
-
+        //will be called in ioThread
         void removeConnection(const TcpConnectionPtr &conn) {
+            loop_->runInLoop(std::bind(
+                    &TcpServer::removeConnectionInLoop, this, conn));
+        }
+
+        void removeConnectionInLoop(const TcpConnectionPtr &conn) {
             loop_->assertInLoopThread();
             LOG_INFO << "TcpServer::removeConnection [" << name_
                      << "] - connection " << conn->getName();
             connections_.erase(conn->getName());
-
-            loop_->queueInLoop(std::bind(
-                    &TcpConnection::connectionDestroyed, conn));
+            EventLoop *ioLoop = conn->getLoop();
+            ioLoop->queueInLoop(
+                    std::bind(&TcpConnection::connectionDestroyed, conn));
         }
 
         const string name_;
@@ -106,14 +133,16 @@ namespace RN {
         InetAddress serverAddr_;
 
         std::unique_ptr<Acceptor> acceptor_;
+        int numOfThreads_;
+        std::unique_ptr<EventLoopThreadPool> threadPool_;
         int nextConnectionId_;
         ConnectionMap connections_;
         bool started_;
         MessageCallback messageCallback_;
         ConnectionCallback connectionCallback_;
         CloseCallback closeCallback_;
-
-
+        WriteCompleteCallback writeCompleteCallback_;
+        HighWaterMarkCallback highWaterMarkCallback_;
     };
 }
 

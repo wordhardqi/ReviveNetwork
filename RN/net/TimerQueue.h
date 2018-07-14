@@ -38,6 +38,8 @@ namespace RN {
 
         bool insert(TimerPtr timer);
 
+        bool remove(TimerId timerId);
+
         EventLoop *loop_;
         const int timerfd_;
         Channel timerfdChannel_;

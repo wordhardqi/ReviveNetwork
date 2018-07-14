@@ -30,6 +30,13 @@ namespace RN {
 
         void setReuseAddr(bool on);
 
+        void setTcpNoDelay(bool on);
+
+        void setKeepAlive(bool on);
+
+        void shutdownWrite();
+
+
     private:
         const int sockfd_;
     };

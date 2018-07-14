@@ -82,6 +82,14 @@ bool RN::TimerQueue::insert(RN::TimerPtr timer) {
 
 }
 
+bool RN::TimerQueue::remove(RN::TimerId timerToRemove) {
+    bool earliestChanged = false;
+    TimerId firstTimer = TimerId(timers_.begin()->second);
+    if (firstTimer == timerToRemove) {
+        timers_.erase()
+    }
+}
+
 RN::TimerId RN::TimerQueue::addTimer(const RN::TimerCallback &cb,
                                      RN::Timestamp when,
                                      double interval) {
